@@ -1,45 +1,37 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
 
-# Install system dependencies and Breeze themes for clean Qt6 GUI styling
 RUN dnf install -y \
-    speech-dispatcher \
-    speech-dispatcher-utils \
-    kmouth \
-    qt6-qtspeech-speechd \
-    qt5-qtspeech-speechd \
-    python3-pip \
-    alsa-utils \
-    curl \
-    dbus-daemon \
-    plasma-breeze-qt6 \
-    breeze-icon-theme \
-    sudo \
-    passwd \
-    && dnf makecache
+        speech-dispatcher \
+        speech-dispatcher-utils \
+        kmouth \
+        qt6-qtspeech-speechd \
+        qt5-qtspeech-speechd \
+        python3-pip \
+        alsa-utils \
+        curl \
+        dbus-daemon \
+        plasma-breeze-qt6 \
+        breeze-icon-theme \
+        sudo \
+        passwd \
+    && dnf clean all
 
-# Install Piper TTS globally
-RUN pip3 install --break-system-packages piper-tts
+RUN pip3 install --no-cache-dir --break-system-packages piper-tts
 
-# Create voice directory and download the Amy voice model files
 RUN mkdir -p /usr/share/piper-voices \
-    && curl -L https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx -o /usr/share/piper-voices/en_US-amy-medium.onnx \
-    && curl -L https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json -o /usr/share/piper-voices/en_US-amy-medium.onnx.json
+    && curl -L https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx \
+        -o /usr/share/piper-voices/en_US-amy-medium.onnx \
+    && curl -L https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json \
+        -o /usr/share/piper-voices/en_US-amy-medium.onnx.json
 
-# Copy piper-generic configuration
 COPY piper-generic.conf /etc/speech-dispatcher/modules/piper-generic.conf
 
-# Enable ONLY piper-generic in system-wide speechd.conf (disabling buggy default modules)
 RUN sed -i 's/^[[:space:]]*AddModule/#AddModule/' /etc/speech-dispatcher/speechd.conf \
     && echo 'AddModule "piper-generic" "sd_generic" "piper-generic.conf"' >> /etc/speech-dispatcher/speechd.conf \
-    && sed -i 's/# DefaultModule espeak-ng/DefaultModule piper-generic/' /etc/speech-dispatcher/speechd.conf \
-    && sed -i 's/DefaultModule espeak-ng/DefaultModule piper-generic/' /etc/speech-dispatcher/speechd.conf
+    && sed -i 's/DefaultModule espeak-ng/DefaultModule piper-generic/g' /etc/speech-dispatcher/speechd.conf
 
-# Set environment variables for JIT bypass globally (Bash & Fish)
 RUN mkdir -p /etc/profile.d /etc/fish/conf.d \
-    && echo 'export QT_ENABLE_REGEXP_JIT=0' > /etc/profile.d/kmouth-jit.sh \
-    && echo 'export QV4_FORCE_INTERPRETER=1' >> /etc/profile.d/kmouth-jit.sh \
-    && echo 'set -gx QT_ENABLE_REGEXP_JIT 0' > /etc/fish/conf.d/kmouth-jit.fish \
-    && echo 'set -gx QV4_FORCE_INTERPRETER 1' >> /etc/fish/conf.d/kmouth-jit.fish
+    && printf 'export QT_ENABLE_REGEXP_JIT=0\nexport QV4_FORCE_INTERPRETER=1\n' > /etc/profile.d/kmouth-jit.sh \
+    && printf 'set -gx QT_ENABLE_REGEXP_JIT 0\nset -gx QV4_FORCE_INTERPRETER 1\n' > /etc/fish/conf.d/kmouth-jit.fish
 
-# Default command to run when container launches
 CMD ["/usr/bin/kmouth"]

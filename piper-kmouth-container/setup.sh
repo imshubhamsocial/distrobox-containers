@@ -1,42 +1,40 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Setup script for building and initializing the kmouth-piper container (Distrobox method)
+CONTAINER_NAME="kmouth-piper-box"
+IMAGE_NAME="kmouth-piper"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "=================================================="
-echo " Building local container image 'kmouth-piper'... "
-echo "=================================================="
-podman build -t kmouth-piper "$SCRIPT_DIR"
+check_prereqs() {
+    local cmd
+    for cmd in podman distrobox; do
+        if ! command -v "$cmd" &>/dev/null; then
+            echo "Error: '$cmd' is required but not installed." >&2
+            exit 1
+        fi
+    done
+}
 
-echo ""
-echo "=================================================="
-echo " Initializing Distrobox 'kmouth-piper-box'... "
-echo "=================================================="
+build_image() {
+    podman build -t "$IMAGE_NAME" "$SCRIPT_DIR"
+}
 
-# Check and remove old distrobox if it exists
-if distrobox list | grep -q "kmouth-piper-box"; then
-    echo "Removing existing distrobox 'kmouth-piper-box'..."
-    distrobox rm -f kmouth-piper-box
-fi
+create_distrobox() {
+    if distrobox list | grep -q "$CONTAINER_NAME"; then
+        distrobox rm -f "$CONTAINER_NAME"
+    fi
+    distrobox create --name "$CONTAINER_NAME" --image "localhost/${IMAGE_NAME}:latest" --yes
+}
 
-# Create distrobox using our custom image
-distrobox create --name kmouth-piper-box --image localhost/kmouth-piper:latest --yes
+export_app() {
+    distrobox enter "$CONTAINER_NAME" -T -- distrobox-export --app kmouth
+}
 
-# Give Podman a moment to register container state
-sleep 2
+main() {
+    check_prereqs
+    build_image
+    create_distrobox
+    export_app
+}
 
-# Export KMouth from the distrobox to the host system
-echo ""
-echo "=================================================="
-echo " Exporting KMouth application to host... "
-echo "=================================================="
-distrobox enter kmouth-piper-box -T -- distrobox-export --app kmouth
-
-echo ""
-echo "=================================================="
-echo " Setup complete! "
-echo " You can now launch KMouth from your host's "
-echo " application menu or by running: "
-echo "   ~/distrobox-containers/piper-kmouth-container/run.sh "
-echo "=================================================="
+main "$@"

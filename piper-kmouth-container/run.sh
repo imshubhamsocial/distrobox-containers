@@ -1,12 +1,22 @@
 #!/bin/bash
-# Launcher script to run the kmouth-piper container inside Distrobox
+set -euo pipefail
+
+CONTAINER_NAME="kmouth-piper-box"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Check if distrobox exists, initialize if not
-if ! distrobox list | grep -q "kmouth-piper-box"; then
-    echo "Distrobox 'kmouth-piper-box' not found. Initializing setup..."
-    "$SCRIPT_DIR/setup.sh"
-fi
+ensure_container_exists() {
+    if ! distrobox list | grep -q "$CONTAINER_NAME"; then
+        "$SCRIPT_DIR/setup.sh"
+    fi
+}
 
-echo "Launching KMouth inside Distrobox..."
-distrobox enter kmouth-piper-box -- kmouth "$@"
+launch_kmouth() {
+    distrobox enter "$CONTAINER_NAME" -- kmouth "$@"
+}
+
+main() {
+    ensure_container_exists
+    launch_kmouth "$@"
+}
+
+main "$@"
