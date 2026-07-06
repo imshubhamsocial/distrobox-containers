@@ -4,6 +4,13 @@ This directory contains the files needed to build and launch a completely self-c
 
 Distrobox handles host integration (D-Bus, graphics display, sound server, and home configuration directories) seamlessly, and all packages and configs are installed isolated within the container.
 
+## Table of Contents
+
+- [Files in this Setup](#files-in-this-setup)
+- [How to Install and Run](#how-to-install-and-run)
+- [Run manually (Terminal)](#run-manually-terminal)
+- [How to Uninstall](#how-to-uninstall)
+
 ---
 
 ## Files in this Setup

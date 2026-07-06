@@ -2,6 +2,11 @@
 
 This repository is a collection of my custom, self-contained container configurations and helper scripts running via **Distrobox**. These setups provide desktop integration (D-Bus, audio, and graphics) while keeping application dependencies isolated from the host system.
 
+## Table of Contents
+
+- [Containers List](#containers-list)
+- [Setup & Prerequisites](#setup--prerequisites)
+
 ## Containers list
 
 | Directory | Container Name | Base Image | Description |
