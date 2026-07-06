@@ -23,3 +23,14 @@ sudo apt install distrobox podman -y
 ```
 
 Navigate to any container folder and follow its specific README to build and run the container.
+
+## Configuration & Usage
+
+After initializing a container, configure the application settings as follows:
+
+### KMouth + Piper TTS Configuration
+1. Launch **KMouth** from your host's application launcher.
+2. Open configuration via **Settings** -> **Configure KMouth...** -> **Text-to-Speech**.
+3. Select **`speechd`** as the Text-to-Speech engine / backend.
+4. Select **`en_US-amy-medium`** as the default voice.
+
