@@ -1,20 +1,11 @@
 FROM registry.fedoraproject.org/fedora-toolbox:latest
 
+COPY packages /toolbox-packages
+
 RUN dnf install -y \
-        speech-dispatcher \
-        speech-dispatcher-utils \
-        kmouth \
-        qt6-qtspeech-speechd \
-        qt5-qtspeech-speechd \
-        python3-pip \
-        alsa-utils \
-        curl \
-        dbus-daemon \
-        plasma-breeze-qt6 \
-        breeze-icon-theme \
-        sudo \
-        passwd \
-    && dnf clean all
+        $(cat /toolbox-packages | xargs) \
+    && dnf clean all \
+    && rm /toolbox-packages
 
 RUN pip3 install --no-cache-dir --break-system-packages piper-tts
 

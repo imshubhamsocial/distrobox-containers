@@ -1,25 +1,37 @@
 # KMouth-Piper Distrobox Container Setup
 
-This directory contains everything needed to initialize and launch a completely self-contained **KMouth + Piper TTS** setup integrated via **Distrobox** (using a standard Fedora Toolbox image).
-Distrobox handles host integration (D-Bus, graphics display, sound server, and home configuration directories) flawlessly, and all packages and configs are installed isolated within the container.
+This directory contains the files needed to build and launch a completely self-contained **KMouth + Piper TTS** setup integrated via **Distrobox** (using a Fedora Toolbox image as the base).
+
+Distrobox handles host integration (D-Bus, graphics display, sound server, and home configuration directories) seamlessly, and all packages and configs are installed isolated within the container.
 
 ---
 
 ## Files in this Setup
 
-* **`piper-generic.conf`**: Speech Dispatcher module routing engine setup to run Piper TTS at `22050` Hz sample rate.
-* **`setup.sh`**: Automated shell script to create the `kmouth-piper-box` distrobox, install all required dependencies (Speech Dispatcher, KMouth, Breeze style plugins, Pip wheels, and voice models) step-by-step, configure them, and export the application launcher shortcut to your host.
-* **`run.sh`**: Helper execution script that launches the KMouth application inside the container using Distrobox.
+* **[Containerfile](file:///var/home/imshubhamsocial/distrobox-containers/piper-kmouth-container/Containerfile)**: Podman build recipe defining the container image.
+* **[packages](file:///var/home/imshubhamsocial/distrobox-containers/piper-kmouth-container/packages)**: List of Fedora packages installed inside the container.
+* **[piper-generic.conf](file:///var/home/imshubhamsocial/distrobox-containers/piper-kmouth-container/piper-generic.conf)**: Speech Dispatcher module routing engine setup to run Piper TTS at `22050` Hz sample rate.
 
 ---
 
-## How to Install
+## How to Install and Run
 
-Simply open your terminal, navigate to this directory, and run the setup script:
-
+### 1. Build the Podman Image
+From this directory, run:
 ```bash
-cd ~/distrobox-containers/piper-kmouth-container
-./setup.sh
+podman build -t kmouth-piper .
+```
+
+### 2. Create the Distrobox Container
+Create the container using the newly built image:
+```bash
+distrobox create --name kmouth-piper-box --image localhost/kmouth-piper:latest --yes
+```
+
+### 3. Export KMouth to the Host
+Export the KMouth application to the host launcher/desktop menu:
+```bash
+distrobox enter kmouth-piper-box -T -- distrobox-export --app kmouth
 ```
 
 Once completed:
@@ -30,24 +42,28 @@ Once completed:
 
 ---
 
-## How to Run manually
+## Run manually (Terminal)
 
-If you prefer to launch the application directly from the terminal:
-
+If you prefer to launch KMouth directly from your terminal:
 ```bash
-~/distrobox-containers/piper-kmouth-container/run.sh
+distrobox enter kmouth-piper-box -- kmouth
 ```
 
 ---
 
 ## How to Uninstall
 
-If you ever want to completely remove this setup and all its files from your system, run:
+To completely remove the setup:
 
-```bash
-# 1. Delete the distrobox container
-distrobox rm -f kmouth-piper-box
-
-# 2. Remove the source directory
-rm -rf ~/distrobox-containers
-```
+1. **Remove the application shortcut from host:**
+   ```bash
+   distrobox enter kmouth-piper-box -T -- distrobox-export --app kmouth --delete
+   ```
+2. **Remove the distrobox container:**
+   ```bash
+   distrobox rm -f kmouth-piper-box
+   ```
+3. **Remove the built image:**
+   ```bash
+   podman rmi localhost/kmouth-piper:latest
+   ```

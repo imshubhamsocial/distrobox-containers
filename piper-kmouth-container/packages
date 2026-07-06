@@ -1,0 +1,13 @@
+speech-dispatcher
+speech-dispatcher-utils
+kmouth
+qt6-qtspeech-speechd
+qt5-qtspeech-speechd
+python3-pip
+alsa-utils
+curl
+dbus-daemon
+plasma-breeze-qt6
+breeze-icon-theme
+sudo
+passwd
