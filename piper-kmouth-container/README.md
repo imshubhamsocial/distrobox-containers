@@ -74,3 +74,9 @@ To completely remove the setup:
    ```bash
    podman rmi localhost/kmouth-piper:latest
    ```
+4. **Remove KMouth configuration and data files from host:**
+   ```bash
+   rm -f ~/.config/kmouthrc
+   rm -rf ~/.local/share/kmouth/
+   rm -f ~/.local/share/applications/kmouth-piper-box*
+   ```
